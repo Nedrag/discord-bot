@@ -12,6 +12,8 @@ module.exports =
 
        
         //if(!channel.messages.size) {console.error("Nothing to delete!");return;} // Da ne baci error.
+        //ada
+        
         
         await channel.bulkDelete(50, true).then(messages => console.log(`Bulk deleted ${messages.size} messages`)).catch( (error) => {return;})
         
