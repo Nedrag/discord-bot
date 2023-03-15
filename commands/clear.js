@@ -15,7 +15,8 @@ module.exports =
         //ada
         
         
-        await channel.bulkDelete(50, true).then(messages => console.log(`Bulk deleted ${messages.size} messages`)).catch( (error) => {return;})
+        channel.bulkDelete(50, true).then(messages => console.log(`Bulk deleted ${messages.size} messages`)).catch( (error) => {return;})
+        await interaction.reply("Chat clean!");
         
         
     }
