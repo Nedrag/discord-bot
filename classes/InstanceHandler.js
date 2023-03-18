@@ -12,13 +12,13 @@ class InstanceHandler {
     }
     handleCreateThread()
     {
-        if(!(this.#interaction.channel.id == this.#util.CHANNEL_ID)) return;//CHANNEL for starting encounters
+        if(!(this.#interaction.channel.id == this.#util.INSTANCE_CHANNEL_ID)) return;//CHANNEL for starting encounters
         console.log("Succsefully created a thread!");
         //TODO:
         //Check ingame currency itd itd.
 
         //Get channel manager
-        const channel = this.#interaction.guild.channels.cache.find(c => c.id == this.#util.CHANNEL_ID);
+        const channel = this.#interaction.guild.channels.cache.find(c => c.id == this.#util.INSTANCE_CHANNEL_ID);
         this.#util.wait(0.5 * 1000)
         .then(() => 
         {
@@ -31,9 +31,12 @@ class InstanceHandler {
                 //TODO
                 //Dodati welocome message kada udjes u dungeon
 
-                thread => {thread.send(`Hi ${this.#interaction.author}`)//Doda u thread onoga ko je pozvao
+                thread => {thread.send(`WELCOME TO YOUR ENCOUNTER!`)
+                thread.members.add(this.#interaction.author.id) //Doda u thread onoga ko je pozvao 
                 }
             )
+            
+
         })
     }
 };

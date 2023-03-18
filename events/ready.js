@@ -1,10 +1,13 @@
-const {Events} = require('discord.js');
-//const {Character} = require('../bot.js')
+const {Events, Collection} = require('discord.js');
+
+
+
 
 module.exports = {//Console log-uje da je ulogovan, kada se bot pokrene.
     name: Events.ClientReady,
     once: true, 
-    execute(client){
+    async execute(client){
+        
        console.log(`Logged in as ${client.user.tag}.`);
     }
 }

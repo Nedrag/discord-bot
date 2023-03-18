@@ -1,4 +1,6 @@
 const {BotUtil} = require("./BotUtil.js");
+const {Collection} = require('discord.js');
+const items = new Collection();
 
 class SlotHandler
 {
@@ -8,22 +10,23 @@ class SlotHandler
 
     #util; //Utility
     #interaction; //Main payload
+    #ITEM_COLLECTION
 
     constructor(interaction){
         this.#interaction = interaction;
         this.#util = new BotUtil(interaction);
+        this.#ITEM_COLLECTION = items;
     }
 
-    handleRoll()
+    async handleRoll()
     {
-        if(this.#util.checkRollChannel()) return;
-        const rollModifier = Math.random(); //Impelmentirati neku normalnu raspodelu za ovo
-        //TODO
-        //-na osonvu rollMod, izabere se item iz pool-a 
-        if(rollModifier < 0.5) return;
+        if(this.#util.checkRollChannel()) return;//Is Roll channel
 
-        this.#interaction.reply("hi!");
+
+
+
     }
+
 }
 module.exports = {SlotHandler};
 

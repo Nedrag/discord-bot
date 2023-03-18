@@ -1,21 +1,16 @@
 const fs = require('node:fs'); // Da mozes da citas file-ove iz drugih directorijuma
 const path = require('node:path'); //Da mozes da napises path do file-ova.
-const {Sequelize} = require('sequelize');
+//const {Sequelize} = require('sequelize');
+
 // Require the necessary discord.js classes
-const { Client,Collection,  Events, GatewayIntentBits } = require('discord.js');
+const { Client,Collection, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages] });
 client.commands = new Collection();// Collection() -> Pravi Hash mapu, storuju se komande. 
 
-const sequelizes = new Sequelize('database', 'user', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: false,
-	// SQLite only
-	storage: 'database.sqlite',
-});
+
 
 
 const commandsPath = path.join(__dirname, 'commands'); // Path za commande folder
@@ -47,12 +42,6 @@ for (const file of eventFiles) {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
 }
-const sequelize = new Sequelize('database', 'user', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: false,
-	// SQLite only
-	storage: 'database.sqlite',
-});
+
 // Log in to Discord with your client's token
 client.login(token);
