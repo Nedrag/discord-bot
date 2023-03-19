@@ -9,31 +9,11 @@ const {SlotHandler} = require('../classes/SlotHandler.js');
 const COMMAND_PREFIX = '$';
 
 //Database imports for events
-const items = new Collection();
 const { Users, Items } = require('../db/dbObjects.js');
 const { Op } = require('sequelize');
 
-async function addBalance(id, amount) {
 
 
-    
-	const user = items.get(id);
-
-	if (user) {
-		user.balance += Number(amount);
-		return user.save();
-	}
-
-	const newUser = await Users.create({ user_id: id, balance: amount });
-	items.set(id, newUser);
-
-	return newUser;
-}
-
-function getBalance(id) {
-	const user = items.get(id);
-	return user ? user.balance : 0;
-}
 
 
 
@@ -42,10 +22,6 @@ module.exports =
     name: Events.MessageCreate,
     async execute(interaction)
     {
-        //Updates the items collection with current database inforamtion
-        const stored = await Users.findAll();  
-        stored.forEach(i => items.set(i.user_id, i));
-        console.log(items);
 
         if(!(interaction.content.charAt(0) === COMMAND_PREFIX)) return; // Checks if command
         //TODO:
@@ -53,7 +29,10 @@ module.exports =
 
         //Handlers for message commands
         const instanceHandler = new InstanceHandler(interaction);//Intance Handler Object 
+
         const slotHandler = new SlotHandler(interaction);
+        //slotHandler.updateCollection();
+        
 
         //Main logic for commands    
         switch(interaction.content.toUpperCase())
@@ -64,12 +43,19 @@ module.exports =
                 break;
             case "$R":
                 slotHandler.handleRoll();
+                //console.log(slotHandler.getItem())
                 break;
+            case "$BALANCE":
             case "$B":
-                addBalance(interaction.author.id, 50);
-                //interaction.reply(getBalance(interaction.author.id));
-                console.log(getBalance(interaction.author.id));
+                //console.log(slotHandler.getBalance(interaction.author.id));
+                interaction.reply(`${interaction.author} your current balance: $${slotHandler.getBalance()}`)
+
                 break;
+            case "$ADD":
+                slotHandler.addBalance(50);
+                interaction.reply(`${interaction.author} your current balance: $${slotHandler.getBalance()}`)
+                break;
+
         }
     }
 }

@@ -16,13 +16,27 @@ const force = process.argv.includes('--force') || process.argv.includes('-f');
 
 sequelize.sync({ force }).then(async () => {
 	const items = [
-		Items.upsert({ name: 'Tea', cost: 1 , rarity: 0.1}),
-		Items.upsert({ name: 'Coffee', cost: 2, rarity: 0.1 }),
-		Items.upsert({ name: 'Cake', cost: 5, rarity: 0.1 }),
+		Items.upsert({ name: 'Star Platinum', cost: 100000 , rarity: 0.01}),
+		Items.upsert({ name: 'Hermit Purple', cost: 56000, rarity: 0.02 }),
+		Items.upsert({ name: `Magician's Red`, cost: 56000, rarity: 0.02 }),
+		Items.upsert({ name: 'Hierophant Green', cost: 56000 , rarity: 0.02}),
+		Items.upsert({ name: 'Silver Chariot', cost: 56000, rarity: 0.02 }),
+		Items.upsert({ name: `The Fool`, cost: 56000, rarity: 0.02 }),
+		Items.upsert({ name: 'The World', cost: 100000 , rarity: 0.01}),
+		Items.upsert({ name: 'Osiris', cost: 25000 , rarity: 0.05}),
+		Items.upsert({ name: 'Anubis', cost: 25000 , rarity: 0.05}),
+		Items.upsert({ name: 'Horus', cost: 25000 , rarity: 0.05}),
+		Items.upsert({ name: 'Atum', cost: 25000 , rarity: 0.05}),
+		Items.upsert({ name: 'Tohth', cost: 25000 , rarity: 0.05}),
+		Items.upsert({ name: 'Geb', cost: 25000 , rarity: 0.05}),
+		Items.upsert({ name: 'Khnum', cost: 25000 , rarity: 0.05}),
+		Items.upsert({ name: 'Bastet', cost: 25000 , rarity: 0.05}),
+		Items.upsert({ name: 'Sethan', cost: 25000 , rarity: 0.05}),
+        
 	];
 
     //NOTE: ADDS A FIELD
-    //Should be initiated with the database
+    //If the database already exists
     /*const queryInterface = sequelize.getQueryInterface();
     const addField = [
         queryInterface.addColumn('Users', 'gambas',

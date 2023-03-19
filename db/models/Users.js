@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         gambas : {
             type: DataTypes.INTEGER,
-            defaultValue: 100,
+            defaultValue: 10,
             allowNull: false
         }
         
