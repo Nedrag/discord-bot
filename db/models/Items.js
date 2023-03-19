@@ -11,7 +11,28 @@ module.exports = (sequelize, DataTypes) => {
         rarity :{
             type: DataTypes.FLOAT,
             allowNull: false
-        }
+        },
+		power: {//Strength
+			type: DataTypes.INTEGER,
+			allowNull: false,
+		},
+		speed: {//Attack speed
+			type: DataTypes.INTEGER,
+			allowNull: false,
+		},
+		stamina: {//Health
+			type: DataTypes.INTEGER,
+			allowNull: false,
+		},
+		precision: {//Accuracy
+			type: DataTypes.INTEGER,
+			allowNull: false,
+		},
+		mana: {//Accuracy
+			type: DataTypes.INTEGER,
+			allowNull: false,
+		},
+
 	}, {
 		timestamps: false,
 	});

@@ -5,6 +5,7 @@ const { execute } = require("./ready");
 //Custom classes imports
 const {InstanceHandler} = require('../classes/InstanceHandler.js');
 const {SlotHandler} = require('../classes/SlotHandler.js');
+const {UserInventoryHandler} = require('../classes/UserInventoryHandler.js');
 
 const COMMAND_PREFIX = '$';
 
@@ -29,10 +30,9 @@ module.exports =
 
         //Handlers for message commands
         const instanceHandler = new InstanceHandler(interaction);//Intance Handler Object 
-
-        const slotHandler = new SlotHandler(interaction);
-        //slotHandler.updateCollection();
-        
+        const slotHandler = new SlotHandler(interaction); 
+        const userInventoryHandler = new UserInventoryHandler(interaction);
+        await userInventoryHandler.addUser();
 
         //Main logic for commands    
         switch(interaction.content.toUpperCase())
@@ -42,18 +42,19 @@ module.exports =
                 instanceHandler.handleCreateThread();
                 break;
             case "$R":
-                slotHandler.handleRoll();
+                interaction.reply(`You just rolled ${await slotHandler.handleRoll()}
+                You have ${await userInventoryHandler.getGambas()} Gambas left`);
+                
                 //console.log(slotHandler.getItem())
                 break;
             case "$BALANCE":
             case "$B":
-                //console.log(slotHandler.getBalance(interaction.author.id));
-                interaction.reply(`${interaction.author} your current balance: $${slotHandler.getBalance()}`)
+                await userInventoryHandler.getInventory();
+                interaction.reply(`${interaction.author} your current balance: $${await userInventoryHandler.getBalance()}`)
 
                 break;
             case "$ADD":
-                slotHandler.addBalance(50);
-                interaction.reply(`${interaction.author} your current balance: $${slotHandler.getBalance()}`)
+                interaction.reply(`New balance: ${await userInventoryHandler.addBalance()}`);
                 break;
 
         }

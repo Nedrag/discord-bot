@@ -25,24 +25,14 @@ class SlotHandler
         this.#util = new BotUtil(interaction);
 
     }
-    async updateCollection()
-    {
-        //Updates the users collection with current database inforamtion
-        const storedUsers =  await Users.findAll();  
-        const storedItems = await Items.findAll();
-        storedUsers.forEach(i => users.set(i.user_id, i));
-        storedItems.forEach(i => items.set(i.id, i));
-        
-        return;
-        //console.log(users);
-    }
-    getItem()
+    async getItem()
     {
         //TODO
         //Implement a better random roll system [DONE]
-
+        const items = await Items.findAll();
         let weightSum = 0;
-        for(const item of items.values())
+
+        for(const item of items)
         {
             weightSum += item.rarity;
         }
@@ -50,7 +40,7 @@ class SlotHandler
         const min = 0;
         let rnd = Math.random() * (weightSum - min) + min;
         
-        for(const item of items.values())
+        for(const item of items)
         {
             //console.log(item.rarity);
             //console.log(rnd);
@@ -80,10 +70,12 @@ class SlotHandler
 
     async handleRoll()
     {
+        //TODO 
+        //Handle a case where user doesn't have any gambas left
         //if(this.#util.checkRollChannel()) return;//Is Roll channel
         //console.log("OK");
 
-        const user = users.get(this.#interaction.author.id);
+        const user = await Users.findOne({where : {user_id : this.#interaction.author.id}});
         if(!user) return;
         //console.log("OK");
 
@@ -91,34 +83,11 @@ class SlotHandler
         if(!gambas) return; //If the user doesn't have any rolls left
         //console.log("OK");
 
-        const rolledItem = this.getItem();
-        this.#interaction.reply(`You Rolled ${rolledItem.name}`);
+        const rolledItem = await this.getItem();
         this.addItem(this.#interaction.author.id, rolledItem);
-        user.gambas -= Number(1);
-        user.save();
-        this.#interaction.reply(`You have ${gambas} left.`);
-    }
-    
-    getBalance() {
-        const id = this.#interaction.author.id;
-        
-        const user = users.get(id);
-        return user ? user.balance : 0;
-    }
-    async addBalance(amount) {
-        const id = this.#interaction.author.id;
-        const user = users.get(id);
+        await user.update({gambas: user.gambas - 1 } , {where : {user_id: this.#interaction.author.id}});
 
-        if (user) {
-            user.balance += Number(amount);
-            user.gambas += Number(10);
-            return user.save();
-        }
-
-        const newUser = await Users.create({ user_id: id, balance: amount });
-        users.set(id, newUser);
-
-        return newUser;
+        return rolledItem.name
     }
 
 }
