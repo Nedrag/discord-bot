@@ -1,5 +1,6 @@
 //Custom
 const {BotUtil} = require("./BotUtil.js");
+const {UserInventoryHandler} = require("./UserInventoryHandler.js");
 
 //Discord.js
 const {Collection} = require('discord.js');
@@ -68,26 +69,52 @@ class SlotHandler
         //console.log(user);
     }
 
+
     async handleRoll()
     {
         //TODO 
-        //Handle a case where user doesn't have any gambas left
-        //if(this.#util.checkRollChannel()) return;//Is Roll channel
-        //console.log("OK");
 
         const user = await Users.findOne({where : {user_id : this.#interaction.author.id}});
-        if(!user) return;
+        if(!user) return false;
         //console.log("OK");
 
         const gambas = user.gambas;
-        if(!gambas) return; //If the user doesn't have any rolls left
+        if(!gambas){
+            this.#interaction.reply("You don't have any gambas left...");    
+            
+            return false
+        }; //If the user doesn't have any rolls left
         //console.log("OK");
 
         const rolledItem = await this.getItem();
-        this.addItem(this.#interaction.author.id, rolledItem);
-        await user.update({gambas: user.gambas - 1 } , {where : {user_id: this.#interaction.author.id}});
+        const item = await UserItems.findOne({where : {user_id : this.#interaction.author.id, item_id : rolledItem.id}});
+        //console.log(item);
+        if(item != null){//Ako je null odnosno ako user nema taj item 
+            
+            //if the user already has the rolled item => Add it's cost to the balance
+            await Users.increment({balance: rolledItem.cost, gambas : -1}, {where: {user_id: this.#interaction.author.id}});
+            const amountGained = rolledItem.cost*0.01;
+            const uih = new UserInventoryHandler(this.#interaction);
+            await uih.handleLevelUp(amountGained);
 
-        return rolledItem.name
+            //REPLY MESSAGE
+            this.#interaction.reply(`You rolled: ${rolledItem.name}
+            You have ${user.gambas - 1} left`);
+            this.#interaction.reply(`Rolled duplicate => New Balance: ${user.balance}`);
+
+            return true;
+
+        }
+
+
+        this.addItem(this.#interaction.author.id, rolledItem);
+        await user.increment({gambas: -1 } , {where : {user_id: this.#interaction.author.id}});
+        //REPLY MESSAGE
+        this.#interaction.reply(`You rolled: ${rolledItem.name}
+        You have ${user.gambas - 1} left`);
+
+
+        return true; 
     }
 
 }

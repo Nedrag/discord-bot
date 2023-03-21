@@ -34,6 +34,7 @@ class BotUtil
     {
         return this.#interaction.channel.id != this.ROLL_CHANNEL_ID;
     }
+    
 
 };
 module.exports = {BotUtil}

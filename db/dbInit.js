@@ -55,11 +55,11 @@ sequelize.sync({ force }).then(async () => {
     //If the database already exists
     /*const queryInterface = sequelize.getQueryInterface();
     const addField = [
-        queryInterface.addColumn('Users', 'gambas',
+        queryInterface.addColumn('Users', 'xp',
         {
-            type : Sequelize.DataTypes.INTEGER,
+            type : Sequelize.DataTypes.FLOAT,
             allowNull : false,
-            defaultValue: 10
+            defaultValue: 0
         })
     ]
     await Promise.all(addField);*/

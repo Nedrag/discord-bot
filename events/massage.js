@@ -42,19 +42,20 @@ module.exports =
                 instanceHandler.handleCreateThread();
                 break;
             case "$R":
-                interaction.reply(`You just rolled ${await slotHandler.handleRoll()}
-                You have ${await userInventoryHandler.getGambas()} Gambas left`);
+                slotHandler.handleRoll();
                 
                 //console.log(slotHandler.getItem())
                 break;
             case "$BALANCE":
             case "$B":
-                await userInventoryHandler.getInventory();
-                interaction.reply(`${interaction.author} your current balance: $${await userInventoryHandler.getBalance()}`)
+                await userInventoryHandler.getBalance();
 
                 break;
             case "$ADD":
-                interaction.reply(`New balance: ${await userInventoryHandler.addBalance()}`);
+                await userInventoryHandler.addBalance(); //ADMIN ONLY
+                break;
+            case "$L":
+                await userInventoryHandler.handleLevelUp(100);
                 break;
 
         }
