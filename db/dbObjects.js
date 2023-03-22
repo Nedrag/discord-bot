@@ -9,26 +9,11 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 });
 
 const Users = require('./models/Users.js')(sequelize, Sequelize.DataTypes);
-const Items = require('./models/Items.js')(sequelize, Sequelize.DataTypes);
-const UserItems = require('./models/UserItems.js')(sequelize, Sequelize.DataTypes);
+const Stands = require('./models/Stands.js')(sequelize, Sequelize.DataTypes);
+const UserStands = require('./models/UserStands.js')(sequelize, Sequelize.DataTypes);
 
-UserItems.belongsTo(Items, { foreignKey: 'item_id', as: 'item' });
-
-//Adds items to the user invenotry
-Reflect.defineProperty(Users.prototype, 'addItem', {
-	value: async item => {
-		const userItem = await UserItems.findOne({
-			where: { user_id: this.user_id, item_id: item.id },
-		});
-
-		if (userItem) {
-			userItem.amount += 1;
-			return userItem.save();
-		}
-
-		return UserItems.create({ user_id: this.user_id, item_id: item.id, amount: 1 });
-	},
-});
+//fk => kolona u UserStands koja ce da pointuje na bazu stands.
+UserStands.belongsTo(Stands, { foreignKey: 'stand_id', as: 'stands' });
 
 
-module.exports = { Users, Items, UserItems};
+module.exports = { Users, Stands, UserStands};

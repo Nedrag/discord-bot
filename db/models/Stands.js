@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('items', {
+	return sequelize.define('stands', {
 		name: {
 			type: DataTypes.STRING,
 			unique: true,
@@ -32,10 +32,6 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 		},
-		type: {
-			type: DataTypes.STRING,
-			allowNUll : false,
-		}
 
 	}, {
 		timestamps: false,

@@ -15,16 +15,7 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 10,
             allowNull: false
         },
-        level : {
-            type: DataTypes.INTEGER,
-            defaultValue: 1,
-            allowNull: false
-        },
-        exp : {
-            type: DataTypes.FLOAT,
-            defaultValue: 0,
-            allowNull: false
-        },
+        
         
     }, {
         timestamps : false

@@ -6,7 +6,7 @@ const {UserInventoryHandler} = require("./UserInventoryHandler.js");
 const {Collection} = require('discord.js');
 
 //Database imports
-const { Users, Items, UserItems } = require('../db/dbObjects.js');
+const { Users, Stands, UserStands } = require('../db/dbObjects.js');
 const { Op } = require('sequelize');
 //Temp collections
 const users = new Collection();
@@ -30,7 +30,7 @@ class SlotHandler
     {
         //TODO
         //Implement a better random roll system [DONE]
-        const items = await Items.findAll();
+        const items = await Stands.findAll();
         let weightSum = 0;
 
         for(const item of items)
@@ -53,19 +53,16 @@ class SlotHandler
     }
     async addItem(id, item)
     {
-            const i = await UserItems.findOne({where : {item_id : item.id, user_id : id}});
-            if(!i){//If the user doesnt alredy have this item -> Adds it to his items
+            const i = await UserStands.findOne({where : {stand_id : item.id, user_id : id}});
 
-                const createItem = await UserItems.create({
-                    user_id: id,
-                    item_id : item.id,
-                    amount: 1
-                });
-                return createItem;
-            }//this passes only if the user already has that item
-            const amountNew = i.amount + 1;
-            const updateItem = await UserItems.update({amount: amountNew}, {where: {item_id : item.id, user_id: id}});
-            return updateItem;
+            const createItem = await UserStands.create({
+                user_id: id,
+                stand_id : item.id,
+                level : 1,
+                exp : 0,
+                equipped : false
+            });
+            return createItem;
         //console.log(user);
     }
 
@@ -87,9 +84,9 @@ class SlotHandler
         //console.log("OK");
 
         const rolledItem = await this.getItem();
-        const item = await UserItems.findOne({where : {user_id : this.#interaction.author.id, item_id : rolledItem.id}});
+        const stand = await UserStands.findOne({where : {user_id : this.#interaction.author.id, stand_id : rolledItem.id}});
         //console.log(item);
-        if(item != null){//Ako je null odnosno ako user nema taj item 
+        if(stand != null){//Ako je null odnosno ako user nema taj stand 
             
             //if the user already has the rolled item => Add it's cost to the balance
             await Users.increment({balance: rolledItem.cost, gambas : -1}, {where: {user_id: this.#interaction.author.id}});

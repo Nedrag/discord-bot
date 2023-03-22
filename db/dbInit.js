@@ -8,45 +8,45 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 	storage: 'database.sqlite',
 });
 
-const Items = require('./models/items.js')(sequelize, Sequelize.DataTypes);
+const Stands = require('./models/Stands.js')(sequelize, Sequelize.DataTypes);
 require('./models/Users.js')(sequelize, Sequelize.DataTypes);
-require('./models/UserItems.js')(sequelize, Sequelize.DataTypes);
+require('./models/UserStands.js')(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 
 sequelize.sync({ force }).then(async () => {
-	const items = [
-		Items.upsert({ name: 'Star Platinum', cost: 100000 , rarity: 0.01,
+	const stands = [
+		Stands.upsert({ name: 'Star Platinum', cost: 100000 , rarity: 0.01,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Hermit Purple', cost: 56000, rarity: 0.02,
+		Stands.upsert({ name: 'Hermit Purple', cost: 56000, rarity: 0.02,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1  }),
-		Items.upsert({ name: `Magician's Red`, cost: 56000, rarity: 0.02,
+		Stands.upsert({ name: `Magician's Red`, cost: 56000, rarity: 0.02,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1  }),
-		Items.upsert({ name: 'Hierophant Green', cost: 56000 , rarity: 0.02,
+		Stands.upsert({ name: 'Hierophant Green', cost: 56000 , rarity: 0.02,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Silver Chariot', cost: 56000, rarity: 0.02,
+		Stands.upsert({ name: 'Silver Chariot', cost: 56000, rarity: 0.02,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1  }),
-		Items.upsert({ name: `The Fool`, cost: 56000, rarity: 0.02,
+		Stands.upsert({ name: `The Fool`, cost: 56000, rarity: 0.02,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1  }),
-		Items.upsert({ name: 'The World', cost: 100000 , rarity: 0.01,
+		Stands.upsert({ name: 'The World', cost: 100000 , rarity: 0.01,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Osiris', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Osiris', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Anubis', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Anubis', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Horus', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Horus', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Atum', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Atum', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Tohth', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Tohth', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Geb', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Geb', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Khnum', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Khnum', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Bastet', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Bastet', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Items.upsert({ name: 'Sethan', cost: 25000 , rarity: 0.05,
+		Stands.upsert({ name: 'Sethan', cost: 25000 , rarity: 0.05,
 		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
         
 	];
@@ -64,7 +64,7 @@ sequelize.sync({ force }).then(async () => {
     ]
     await Promise.all(addField);*/
 
-	await Promise.all(items);
+	await Promise.all(stands);
 	console.log('Database synced');
 
 	sequelize.close();

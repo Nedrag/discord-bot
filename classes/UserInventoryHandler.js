@@ -4,7 +4,7 @@ const {BotUtil} = require("./BotUtil.js");
 const {Collection} = require('discord.js');
 
 //Database imports
-const { Users, Items, UserItems } = require('../db/dbObjects.js');
+const { Users, Stands, UserStands } = require('../db/dbObjects.js');
 const { Op } = require('sequelize');
 //Temp collections
 const users = new Collection();
@@ -18,11 +18,36 @@ class UserInventoryHandler
     {
         this.#interaction = interaction;
     }
+    async handleEquipStand()
+    {
+        let input = "";
+        for(let str of this.#interaction.content.split(" "))
+        {
+            if(str.startsWith("$")) continue;
+            input += str + " ";
+        }
+        console.log(input);
+        //input = input.toUpperCase();
+        const standName = await Stands.findOne({where : {name: input.trimEnd() }})
+        console.log("OK")
+        if(!standName) return;
+
+        const standInInv = await UserStands.findOne({where : {stand_id: standName.id, user_id: this.#interaction.author.id}});
+        if(!standInInv){//Ako user nema taj stand
+            this.#interaction.reply("You do not own that stand!");
+            return;
+        }
+        await UserStands.update({equipped : true}, {where: {stand_id: standName.id, user_id: this.#interaction.author.id}});
+        await UserStands.update({equipped : false}, {where: {stand_id: {[Op.not]: standName.id}, user_id: this.#interaction.author.id }});
+        this.#interaction.reply(`Equipped: ${input}`);
+        
+
+    }
     async updateCollection()
     {
         //Updates the users collection with current database inforamtion
         const storedUsers =  await Users.findAll();  
-        const storedItems = await Items.findAll();
+        const storedItems = await Stands.findAll();
         storedUsers.forEach(i => users.set(i.user_id, i));
         storedItems.forEach(i => items.set(i.id, i));
         
@@ -60,17 +85,18 @@ class UserInventoryHandler
         return (0.1*Math.exp(x) + 1.9 * x)*1000;
     }
     async handleLevelUp(expGained){
-        const user = await Users.findOne({where : {user_id : this.#interaction.author.id}});
-        let reqExp = this.levelUpFunction(user.level);
+        const stand = await UserStands.findOne({where : {user_id : this.#interaction.author.id, equipped: true}});
+        if(!stand) return;
+        let reqExp = this.levelUpFunction(stand.level);
         //Checks if the user is about to level up
-        console.log(user.exp + expGained);
-        if(reqExp < user.exp + expGained){
+        console.log(stand.exp + expGained);
+        if(reqExp < stand.exp + expGained){
             console.log("Proslo")
-            await Users.increment({level: 1 } , {where : {user_id: this.#interaction.author.id}});
-            await this.#interaction.reply(`You level'd up! You're now level ${user.level + 1}`);
+            await UserStands.increment({level: 1 } , {where : {user_id: this.#interaction.author.id, equipped: true}});
+            await this.#interaction.reply(`You level'd up! You're now level ${stand.level + 1}`);
         }
         //updates exp
-        await Users.increment({exp: expGained} , {where : {user_id: this.#interaction.author.id}});
+        await UserStands.increment({exp: expGained} , {where : {user_id: this.#interaction.author.id, equipped: true}});
         await this.#interaction.reply(`You've gained ${expGained}`)
 
     }
@@ -87,10 +113,10 @@ class UserInventoryHandler
     }
     async getInventory()
     {
-        const items = await UserItems.findAll({where : {user_id : this.#interaction.author.id}});
+        const items = await UserStands.findAll({where : {user_id : this.#interaction.author.id}});
         for(const item of items)
         {
-            const i = await Items.findByPk(item.item_id);
+            const i = await Stands.findByPk(item.stand_id);
             console.log(i.name);
         }
     }

@@ -35,7 +35,7 @@ module.exports =
         await userInventoryHandler.addUser();
 
         //Main logic for commands    
-        switch(interaction.content.toUpperCase())
+        switch(interaction.content.toUpperCase().split(" ")[0])
         {
             case "$I":
             case "$INSTANCE":
@@ -56,6 +56,9 @@ module.exports =
                 break;
             case "$L":
                 await userInventoryHandler.handleLevelUp(100);
+                break;
+            case "$E":
+                await userInventoryHandler.handleEquipStand();
                 break;
 
         }
