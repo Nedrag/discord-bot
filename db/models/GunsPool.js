@@ -1,14 +1,13 @@
-
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('guns_and_gear_pool', {
+	return sequelize.define('guns_pool', {
 		name: {
 			type: DataTypes.STRING,
-			unique: true,   
+			unique: true,
 		},
         weight : {
             type: DataTypes.INTEGER,
-            allowNull: false
-        }
+            allowNull : false
+        } 
 	}, {
 		timestamps: false,
 	});

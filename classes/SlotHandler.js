@@ -1,117 +1,103 @@
 //Custom
-const {BotUtil} = require("./BotUtil.js");
 const {UserInventoryHandler} = require("./UserInventoryHandler.js");
 
 //Discord.js
-const {Collection} = require('discord.js');
 
 //Database imports
-const { Users, Stands, UserStands } = require('../db/dbObjects.js');
+const { Users, Stands, UserStands, ItemsGuns_Pistols, ItemRarityPool, GearPool, GunsAndGear,GunsPool} = require('../db/dbObjects.js');
 const { Op } = require('sequelize');
-//Temp collections
-const users = new Collection();
-const items = new Collection();
+const {Pistols} = require("../db/models/Pistols.js");
 
 class SlotHandler
 {
-    //TODO
-    //-Check if the user is in the right channel [DONE]
-    //-Implement rolling []
-
-    #util; //Utility
     #interaction; //Main payload
 
     constructor(interaction){
         this.#interaction = interaction;
-        this.#util = new BotUtil(interaction);
+    }
+    randomWeight(choices)
+    {
+        let weightSum = 0;
+        for(const choice of choices)
+        {
+            weightSum += choice.weight;
+        }
+
+        let randWeight = Math.random() * weightSum;
+        for(const choice of choices)
+        {
+            if(randWeight < choice.weight) return choice;
+            randWeight -= choice.weight;
+        }
+        return null;
+
+    }
+    async handleItemRarity()
+    {
+        const itemRarity_Pool = await ItemRarityPool.findAll();
+        const itemRarity_Choice = this.randomWeight(itemRarity_Pool);
+
+        if(!itemRarity_Choice) return null;
+        return itemRarity_Choice;
+    }
+    async handleItemIsGun()
+    {
+        const itemGuns_Pool = await GunsPool.findAll(); 
+        const itemGuns_Choice = this.randomWeight(itemGuns_Pool);
+
+        //if(itemGuns_Choice.name == "ITEM_GUNS_PISTOL"){
+            const gunPistol_Pool = await ItemsGuns_Pistols.findAll();
+            const gunPistol_Choice = this.randomWeight(gunPistol_Pool);
+            //console.log(gunPistol_Choice);
+
+            return gunPistol_Choice;
+        // }
+        return null;
 
     }
     async getItem()
     {
-        //TODO
-        //Implement a better random roll system [DONE]
-        const items = await Stands.findAll();
-        let weightSum = 0;
+        //TODO 
+        //Implementirati...
+        const gunsAndGear_Pool = await GunsAndGear.findAll();
+        const gunsAndGear_Choice = this.randomWeight(gunsAndGear_Pool);
 
-        for(const item of items)
+        //Kada nije neki gear ili guns
+        if(gunsAndGear_Choice.name == "ITEM_MONEY") return gunsAndGear_Choice;//Ide na neku funkciju koja dodaje na balance od usera
+        if(gunsAndGear_Choice.name == "ITEM_GAMBAS") return gunsAndGear_Choice;
+
+        //const itemRarity_Choice = await this.handleItemIsGun()
+        //console.log(gunsAndGear_Choice.name);
+
+
+        switch(gunsAndGear_Choice.name)
         {
-            weightSum += item.rarity;
+            case "ITEM_GUNS":
+                //this.handleItemIsGun();
+                console.log(await this.handleItemIsGun());
+                break;
+            case "ITEM_GEAR":
+                break;
+
         }
+
         
-        const min = 0;
-        let rnd = Math.random() * (weightSum - min) + min;
-        
-        for(const item of items)
-        {
-            //console.log(item.rarity);
-            //console.log(rnd);
-            if(rnd < item.rarity) return item;
-            rnd -= item.rarity;
-        }
-        
-       
+
+        //console.log(gunsAndGear_Choice);
+
+
     }
     async addItem(id, item)
     {
-            const i = await UserStands.findOne({where : {stand_id : item.id, user_id : id}});
-
-            const createItem = await UserStands.create({
-                user_id: id,
-                stand_id : item.id,
-                level : 1,
-                exp : 0,
-                equipped : false
-            });
-            return createItem;
-        //console.log(user);
+        //TODO 
+        //Implementirati...
     }
 
 
     async handleRoll()
     {
         //TODO 
-
-        const user = await Users.findOne({where : {user_id : this.#interaction.author.id}});
-        if(!user) return false;
-        //console.log("OK");
-
-        const gambas = user.gambas;
-        if(!gambas){
-            this.#interaction.reply("You don't have any gambas left...");    
-            
-            return false
-        }; //If the user doesn't have any rolls left
-        //console.log("OK");
-
-        const rolledItem = await this.getItem();
-        const stand = await UserStands.findOne({where : {user_id : this.#interaction.author.id, stand_id : rolledItem.id}});
-        //console.log(item);
-        if(stand != null){//Ako je null odnosno ako user nema taj stand 
-            
-            //if the user already has the rolled item => Add it's cost to the balance
-            await Users.increment({balance: rolledItem.cost, gambas : -1}, {where: {user_id: this.#interaction.author.id}});
-            const amountGained = rolledItem.cost*0.01;
-            const uih = new UserInventoryHandler(this.#interaction);
-            await uih.handleLevelUp(amountGained);
-
-            //REPLY MESSAGE
-            this.#interaction.reply(`You rolled: ${rolledItem.name}
-            You have ${user.gambas - 1} left`);
-            this.#interaction.reply(`Rolled duplicate => New Balance: ${user.balance}`);
-
-            return true;
-
-        }
-
-
-        this.addItem(this.#interaction.author.id, rolledItem);
-        await user.increment({gambas: -1 } , {where : {user_id: this.#interaction.author.id}});
-        //REPLY MESSAGE
-        this.#interaction.reply(`You rolled: ${rolledItem.name}
-        You have ${user.gambas - 1} left`);
-
-
-        return true; 
+        //Implementirati...
     }
 
 }

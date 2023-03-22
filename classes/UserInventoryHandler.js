@@ -1,14 +1,11 @@
 //Custom
-const {BotUtil} = require("./BotUtil.js");
 //Discord.js
 const {Collection} = require('discord.js');
 
 //Database imports
-const { Users, Stands, UserStands } = require('../db/dbObjects.js');
+const { Users, Stands, UserStands, ItemsGuns_Pistols } = require('../db/dbObjects.js');
 const { Op } = require('sequelize');
 //Temp collections
-const users = new Collection();
-const items = new Collection();
 
 class UserInventoryHandler
 {
@@ -42,17 +39,6 @@ class UserInventoryHandler
         this.#interaction.reply(`Equipped: ${input}`);
         
 
-    }
-    async updateCollection()
-    {
-        //Updates the users collection with current database inforamtion
-        const storedUsers =  await Users.findAll();  
-        const storedItems = await Stands.findAll();
-        storedUsers.forEach(i => users.set(i.user_id, i));
-        storedItems.forEach(i => items.set(i.id, i));
-        
-        return;
-        //console.log(users);
     }
     async addUser(){
 

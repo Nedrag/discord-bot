@@ -32,7 +32,6 @@ module.exports =
         const instanceHandler = new InstanceHandler(interaction);//Intance Handler Object 
         const slotHandler = new SlotHandler(interaction); 
         const userInventoryHandler = new UserInventoryHandler(interaction);
-        await userInventoryHandler.addUser();
 
         //Main logic for commands    
         switch(interaction.content.toUpperCase().split(" ")[0])
@@ -42,7 +41,8 @@ module.exports =
                 instanceHandler.handleCreateThread();
                 break;
             case "$R":
-                slotHandler.handleRoll();
+                //slotHandler.handleRoll();
+                await slotHandler.getItem();
                 
                 //console.log(slotHandler.getItem())
                 break;
@@ -59,6 +59,9 @@ module.exports =
                 break;
             case "$E":
                 await userInventoryHandler.handleEquipStand();
+                break;
+            case "$T":
+                await userInventoryHandler.temp();
                 break;
 
         }
