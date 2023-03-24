@@ -45,8 +45,8 @@ let GUNS_PISTOL_PARTS = new Collection();
 
 GUNS_PISTOL_PARTS.set("BODY",["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF"])
 GUNS_PISTOL_PARTS.set("BARREL", ["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF", "E-TECH"])
-GUNS_PISTOL_PARTS.set("GRIP", ["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF"])
-GUNS_PISTOL_PARTS.set("SCOPE", ["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF", "NONE"])
+//GUNS_PISTOL_PARTS.set("GRIP", ["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF"])
+//GUNS_PISTOL_PARTS.set("SCOPE", ["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF", "NONE"])
 
 const GUNS_SNIPER_PARTS = {
 	"BODY" : ["JAKOBS",  "HYPERION" , "MALIWAN", "DHAL",  "VLADOF"],
@@ -105,21 +105,110 @@ sequelize.sync({ force }).then(async () => {
 
 	//
 	let itemGuns_pistols = [];
-	let i,j,k,l;
+	let i,j,name;
 	let index = 0;
 	for(i = 0 ; i < GUNS_PISTOL_PARTS.get('BODY').length; i++){
-		for(j = 0; j < GUNS_PISTOL_PARTS.get('GRIP').length; j++){
-			for(k = 0; k < GUNS_PISTOL_PARTS.get('SCOPE').length; k++){
-				for(l = 0; l < GUNS_PISTOL_PARTS.get('BARREL').length; l++){
-					itemGuns_pistols[index] = ItemGuns_Pistols.upsert({item_id: index, name: "GUN NO." + i + j + k + l,
-				body: GUNS_PISTOL_PARTS.get("BODY")[i], barrel: GUNS_PISTOL_PARTS.get("BARREL")[l],
-				grip: GUNS_PISTOL_PARTS.get("GRIP")[j], scope: GUNS_PISTOL_PARTS.get("SCOPE")[k]})
-				
-				
+		for(j = 0; j < GUNS_PISTOL_PARTS.get('BARREL').length; j++){
+
+			const body = GUNS_PISTOL_PARTS.get('BODY')[i];
+			const barrel = GUNS_PISTOL_PARTS.get('BARREL')[j];
+
+			if(body == "BANDIT"){
+			if(
+				barrel == "BANDIT" ||
+				barrel == "DAHL" ||
+				barrel == "MALIWAN" ||
+				barrel == "TEDIORE" 
+			) name = "Pistal"
+			if(barrel == "JAKOBS") name = "Ass Beeter!"
+			if(barrel == "HYPERION") name = "Hed Shoter!"
+			if(barrel == "TORGUE") name = "Magamum!"
+			if(barrel == "VLADOF") name = "Ratatater!"
+			}
+
+			if(body == "HYPERION"){
+			if(
+				barrel == "BANDIT" ||
+				barrel == "DHAL" ||
+				barrel == "MALIWAN" ||
+				barrel == "TEDIORE" 
+			) name = "Apparatus"
+			if(barrel == "JAKOBS") name = "Leverage"
+			if(barrel == "HYPERION") name = "Vision"
+			if(barrel == "TORGUE") name = "Impact"
+			if(barrel == "VLADOF") name = "Synergy"
+			}
+
+			if(body == "JAKOBS"){
+			if(
+				barrel == "BANDIT" ||
+				barrel == "DHAL" ||
+				barrel == "MALIWAN" ||
+				barrel == "TEDIORE" 
+			) name = "Revolver Wheelgun"
+			if(barrel == "JAKOBS") name = "Iron"
+			if(barrel == "HYPERION") name = "Longarm"
+			if(barrel == "TORGUE") name = "Widow Maker"
+			if(barrel == "VLADOF") name = "Pepperbox"
+			}
+
+			if(body == "MALIWAN"){
+			if(
+				barrel == "BANDIT" ||
+				barrel == "DHAL" ||
+				barrel == "MALIWAN" ||
+				barrel == "TEDIORE" 
+			) name = "Aegis"
+			if(barrel == "JAKOBS") name = "Torment"
+			if(barrel == "HYPERION") name = "Phobia"
+			if(barrel == "TORGUE") name = "Animosity"
+			if(barrel == "VLADOF") name = "Umbrage"
+			}
+
+			if(body == "TEDIORE"){
+			if(
+				barrel == "BANDIT" ||
+				barrel == "DHAL" ||
+				barrel == "MALIWAN" ||
+				barrel == "TEDIORE" 
+			) name = "Handgun"
+			if(barrel == "JAKOBS") name = "Power Shot"
+			if(barrel == "HYPERION") name = "Aimshot"
+			if(barrel == "TORGUE") name = "Biggun"
+			if(barrel == "VLADOF") name = "Quickshot"
+			}
+			
+			if(body == "TORGUE"){
+			if(
+				barrel == "BANDIT" ||
+				barrel == "DHAL" ||
+				barrel == "MALIWAN" ||
+				barrel == "TEDIORE" 
+			) name = "Hand Cannon"
+			if(barrel == "JAKOBS") name = "Rod"
+			if(barrel == "HYPERION") name = "Hole Puncher"
+			if(barrel == "TORGUE") name = "Slapper"
+			if(barrel == "VLADOF") name = "Injector"
+			}
+			
+			if(body == "VLADOF"){
+			if(
+				barrel == "BANDIT" ||
+				barrel == "DHAL" ||
+				barrel == "MALIWAN" ||
+				barrel == "TEDIORE" 
+			) name = "TMP"
+			if(barrel == "JAKOBS") name = "Fighter"
+			if(barrel == "HYPERION") name = "Assassin"
+			if(barrel == "TORGUE") name = "Troublemaker"
+			if(barrel == "VLADOF") name = "Anarchist"
+			}
+
+			itemGuns_pistols[index] = ItemGuns_Pistols.upsert({
+				body : body, barrel: barrel, name : name, item_id : index 
+			})		
 				index++;
 
-				}
-			}
 		}
 	}
 	

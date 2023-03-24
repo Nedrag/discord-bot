@@ -10,8 +10,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         body : DataTypes.STRING,
         barrel: DataTypes.STRING,
-        grip : DataTypes.STRING,
-        scope : DataTypes.STRING,
         weight : {
             type: DataTypes.INTEGER,
             allowNull : false,
