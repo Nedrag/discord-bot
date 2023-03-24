@@ -10,13 +10,18 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 });
 
 const Stands = require('./models/Stands.js')(sequelize, Sequelize.DataTypes);
+
 require('./models/Users.js')(sequelize, Sequelize.DataTypes);
 require('./models/UserStands.js')(sequelize, Sequelize.DataTypes);
+require('./models/UserGuns.js')(sequelize, Sequelize.DataTypes);
+require('./models/UserGear.js')(sequelize, Sequelize.DataTypes);
+
 const GunsAndGear = require('./models/GunsAndGear.js')(sequelize, Sequelize.DataTypes); 
 const GunsPool = require('./models/GunsPool.js')(sequelize, Sequelize.DataTypes);
 const GearPool = require('./models/GearPool.js')(sequelize, Sequelize.DataTypes);
 const ItemRarityPool = require('./models/ItemsRarityPool.js')(sequelize, Sequelize.DataTypes);
-const ItemGuns_Pistols= require('./models/Pistols.js')(sequelize, Sequelize.DataTypes);
+const ItemGuns_Pistols= require('./models/item_guns/Pistols.js')(sequelize, Sequelize.DataTypes);
+const ItemPistol_Parts= require('./models/item_guns_parts/itemPistol_parts.js')(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 //CONSTANTS *** Weight => The lower the rarer
@@ -211,7 +216,24 @@ sequelize.sync({ force }).then(async () => {
 
 		}
 	}
-	
+	const itemPistol_parts = [
+		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "BANDIT"}),
+		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "DAHL"}),
+		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "HYPERION"}),
+		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "JAKOBS"}),
+		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "MALIWAN"}),
+		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "TEDIORE"}),
+		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "TORGUE"}),
+		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "VLADOF"}),
+		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "BANDIT"}),
+		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "DAHL"}),
+		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "HYPERION"}),
+		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "JAKOBS"}),
+		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "MALIWAN"}),
+		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "TEDIORE"}),
+		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "TORGUE"}),
+		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "VLADOF"}),
+	]	
 
 	await Promise.all(stands);
 	await Promise.all(gunsAndGear);
@@ -219,6 +241,7 @@ sequelize.sync({ force }).then(async () => {
 	await Promise.all(gearPool);
 	await Promise.all(itemRarityPool);
 	await Promise.all(itemGuns_pistols);
+	await Promise.all(itemPistol_parts);
 	console.log('Database synced');
 
 	sequelize.close();

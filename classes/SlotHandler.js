@@ -1,13 +1,10 @@
 //Custom
-const {UserInventoryHandler} = require("./UserInventoryHandler.js");
+const {ItemStatHandler} = require("./ItemStatHandler.js");
 
 //Discord.js
 
 //Database imports
 const { Users, Stands, UserStands, ItemsGuns_Pistols, ItemRarityPool, GearPool, GunsAndGear,GunsPool} = require('../db/dbObjects.js');
-const { Op } = require('sequelize');
-const {Pistols} = require("../db/models/Pistols.js");
-
 class SlotHandler
 {
     #interaction; //Main payload
@@ -18,8 +15,10 @@ class SlotHandler
 
     async handleRoll()
     {
-        //TODO 
-        //Implementirati...
+        
+        console.log("OK1");
+        const ish = new ItemStatHandler(this.#interaction);
+        await ish.addItem();
     }
 
 }

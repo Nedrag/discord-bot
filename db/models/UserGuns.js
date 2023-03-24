@@ -17,12 +17,22 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue : false,
 			allowNull : false
 		},
+		body: DataTypes.STRING,
+		barrel: DataTypes.STRING,
+		grip: DataTypes.STRING,
+		scope: DataTypes.STRING,
+		rarity: DataTypes.STRING,
+		gun_type: DataTypes.STRING,
+
 		gun_name: DataTypes.STRING,
 		damage : DataTypes.INTEGER,
 		accuracy : DataTypes.INTEGER,
 		fire_rate : DataTypes.INTEGER,
 		magazine_size : DataTypes.INTEGER,
 		reload_speed : DataTypes.INTEGER,
+		crit_dmg : DataTypes.INTEGER,
+		shot_cost : DataTypes.INTEGER,
+		projectile_count : DataTypes.INTEGER,
 		//Add Gun Stats
 
 	},
