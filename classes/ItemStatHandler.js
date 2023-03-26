@@ -3,20 +3,11 @@
 const { Collection } = require("discord.js");
 //GUNS BASE STATS
 const BASE_STAT_SCALING = 1.13;
-
-const GUNS_PISTOL_JAKOBS = new Collection();
-GUNS_PISTOL_JAKOBS.set("DAMAGE", 17.6);
-GUNS_PISTOL_JAKOBS.set("MAGAZINE_SIZE", 6.0);
-GUNS_PISTOL_JAKOBS.set("RELOAD_SPEED", 2.1);
-GUNS_PISTOL_JAKOBS.set("FIRE_INTERVAL", 0.06);
-GUNS_PISTOL_JAKOBS.set("ACCURACY", 3.0);
-const JAKOBS_BONUS_CRIT = 0.5;
-const JAKOBS_BONUS_ACCURACY = 2.0;
-
-
 //Stats
 let damage = 0;
-let accuracy = 0; //Accuracy <= the lower the better
+let max_accuracy = 0; //Accuracy <= the lower the better
+let min_accuracy = 2; //Accuracy <= the lower the better
+let spread = 2;
 let fire_interval = 0;
 let magazine_size = 0;
 let reload_speed= 0;
@@ -25,12 +16,23 @@ let shot_cost = 1;
 let projectile_count = 1;
 
 
+
+
 //Database imports
-const {ItemsGuns_Pistols, ItemRarityPool, GunsAndGear,GunsPool, UserGuns, UserGear, ItemPistol_Parts } = require('../db/dbObjects.js');
+const {ItemsGuns_Pistols, ItemRarityPool, GunsAndGear,GunsPool, UserGuns, UserGear, ItemPistol_Parts, Users} = require('../db/dbObjects.js');
 const { Op } = require('sequelize');
 
 class ItemStatHandler {
     #interaction;
+    BODY;
+    GRIP;
+    SIGHT;
+    ACCESSORIE;
+    BARREL;
+    DEFINITON;
+    ELEMENT;
+    PICK;
+
     constructor(interaction)
     {
         this.#interaction = interaction;
@@ -52,19 +54,21 @@ class ItemStatHandler {
         return null;
 
     }
-    handleCalculateStats_grip(grip)
+    /*handleCalculateStats_grip_pistol(grip)
     {
         //Grips stats additions
         if(grip == "BANDIT"){
             magazine_size *= 1.35;
             reload_speed *= 1.1
+            spread *= 1.15
         }
         if(grip == "DAHL"){
-            accuracy *= 1.15
+            max_accuracy *= 1.15
             damage /= 1.06
         }
         if(grip == "HYPERION"){
             damage /=1.09
+            spread /= 1.15
         }
         if(grip == "JAKOBS"){
             fire_interval *= 1.09 
@@ -80,6 +84,7 @@ class ItemStatHandler {
         if(grip == "TORGUE"){
             reload_speed *= 1.1
             damage *= 1.09
+            spread *= 1.1
         }
         if(grip == "VLADOF"){
             fire_interval /= 1.12
@@ -88,16 +93,20 @@ class ItemStatHandler {
         }
 
     }
-    handleCalculateStats_barrel(barrel)
+    handleCalculateStats_barrel_pistol(barrel)
     {
         //Barrel stats additions
         if(barrel == "BANDIT"){
             damage *= 1.06;
-            accuracy *= 1.17;
+            max_accuracy *= 1.17;
+            min_accuracy *= 1.15;
+            spread *= 1.15;
         }
         if(barrel == "DAHL"){
             damage /= 1.09;
-            accuracy /= 1.25;
+            max_accuracy /= 1.25;
+            spread *= 1.2;
+
         }
         if(barrel == "ETECH"){
             damage *= 2; 
@@ -107,32 +116,75 @@ class ItemStatHandler {
         if(barrel == "HYPERION"){
             crit_dmg += 0.15
             magazine_size /= 1.14;
-            accuracy /= 1.25;
+            max_accuracy /= 1.25;
+            min_accuracy /= 1.25;
+            spread /= 1.35;
             damage /=1.12
         }
         if(barrel == "JAKOBS"){
-            damage *= 1.12;
+            damage *= 1.18;
+            fire_interval *= 1.36
+            min_accuracy /= 1.25;
+            spread /= 1.4;
         }
         if(barrel == "MALIWAN"){
-            accuracy /= 1.1
+            max_accuracy /= 1.1
+            spread /= 1.1;
         }
         if(barrel == "TEDIORE"){
 
         }
         if(barrel == "TORGUE"){
             fire_interval *= 1.09;
-            accuracy *= 1.4;
+            max_accuracy *= 1.4;
+            min_accuracy *= 1.4;
             reload_speed *= 1.25;
             damage *= 1.24;
         }
         if(barrel == "VLADOF"){
             fire_interval /= 1.3;
             magazine_size *= 1.28;
-            shot_cost += 1;
-            projectile_count += 1;
+            spread *= 1.2;
         }
 
     }
+    handleCalculateStats_accessorie_pistol(a)
+    {
+        if(a == "ACC_LASER")
+        {
+            max_accuracy /= 1.25;
+            min_accuracy /= 1.25;
+            spread /= 1.4;
+        }
+        if(a == "BAYONET1"){
+
+        }
+        if(a == "BAYONET2"){
+
+        }
+        if(a == "DOUBLE_LASER"){
+            fire_interval *= 1.3;
+            magazine_size *= 1.28
+            magazine_size += 2; 
+            min_accuracy *= 1.25;
+            projectile_count *= 1.6;
+            projectile_count += 0.4;
+            shot_cost *= 2;
+            damage /= 1.15;
+            spread *= 1.25;
+            spread  += 1;
+        }
+        if(a == "STOCK"){
+            max_accuracy /= 1.35;
+        }
+        if(a == "TECH_MAG_1"){
+            magazine_size *= 1.56;
+            reload_speed *= 1.15;
+        }
+        if(a == "TECH_DAMAGE_2"){
+            damage *= 1.18;
+        }
+    }*/
     async handleItemRarity()
     {
         const itemRarity_Pool = await ItemRarityPool.findAll();
@@ -158,7 +210,17 @@ class ItemStatHandler {
         return null;
 
     }
-    async addItem()
+    async handleItemIsMoney()
+    {
+        const amount = 100;
+        await Users.increment({balance: amount} , {where : {user_id : this.#interaction.author.id}});
+    }
+    async handleItemIsGamba()
+    {
+        const amount = 10;
+        await Users.increment({gambas: amount} , {where : {user_id : this.#interaction.author.id}});
+    }
+    async rollAndAddItem()
     {
         //TODO 
         //Implementirati...
@@ -166,54 +228,33 @@ class ItemStatHandler {
         const gunsAndGear_Choice = this.randomWeight(gunsAndGear_Pool);
 
         //Kada nije neki gear ili guns
-        if(gunsAndGear_Choice.name == "ITEM_MONEY") return gunsAndGear_Choice;//Ide na neku funkciju koja dodaje na balance od usera
-        if(gunsAndGear_Choice.name == "ITEM_GAMBAS") return gunsAndGear_Choice;
-
-
+        if(gunsAndGear_Choice.name == "ITEM_MONEY") {await this.handleItemIsMoney(); return;}//Ide na neku funkciju koja dodaje na balance od usera
+        if(gunsAndGear_Choice.name == "ITEM_GAMBAS") {await this.handleItemIsGamba(); return;}
 
         switch(gunsAndGear_Choice.name)
         {
             case "ITEM_GUNS":
-                await this.handleItemIsGun();
+                try {
+                await this.handleItemIsGun()
                 break;
+                }catch(e)
+                {
+                    this.#interaction.reply("Ooops! Something went wrong!")
+                }
             case "ITEM_GEAR":
                 break;
 
         }
-
-        
-
-        //console.log(gunsAndGear_Choice);
-
-
     }
 
     async handleCalculateStats_Gun(gunType, gun, itemRarity)
     {
+        let addGun_User;
         
         //const levelRange  = await Users.findOne({where: this.#interaction.author.id})
         if(gunType == "ITEM_GUNS_PISTOL"){
-
-            const pistol = await ItemsGuns_Pistols.findOne({where : {item_id : gun.item_id}})
-            const grips = await ItemPistol_Parts.findAll({where : {part: "GRIP"}})
-            const scopes = await ItemPistol_Parts.findAll({where : {part: "SCOPE"}})
-            //const accessories = await Pistol_Parts.findAll({where : {part: "ACCESSORIES"}})
-
             //const level = Math.random() * (levelRange + 1 - (levelRange - 3)) - (levelRange - 3);
             const beta = Math.pow(10, BASE_STAT_SCALING);
-
-
-            //Parts
-            const body = pistol.body;
-            const barrel = pistol.barrel;
-            const grip = this.randomWeight(grips).manufacturer;
-            const scope = this.randomWeight(scopes).manufacturer; 
-            //const accessorie = this.randomWeight(accessories).name; 
-
-
-            //Multis
-            let baseMagSize_Multiplier = 1.0
-            let baseDamage_Multiplier = 1.0
 
             //Rarity multis
             if(itemRarity == "ITEM_RARITY_GREEN"){ 
@@ -230,46 +271,106 @@ class ItemStatHandler {
             }
             if(body == "JAKOBS"){
                 damage = GUNS_PISTOL_JAKOBS.get("DAMAGE")*beta*baseDamage_Multiplier;
-                accuracy = GUNS_PISTOL_JAKOBS.get("ACCURACY") + JAKOBS_BONUS_ACCURACY;
+                max_accuracy = GUNS_PISTOL_JAKOBS.get("ACCURACY") + JAKOBS_BONUS_ACCURACY;
                 fire_interval = GUNS_PISTOL_JAKOBS.get("FIRE_INTERVAL");
                 magazine_size = GUNS_PISTOL_JAKOBS.get("MAGAZINE_SIZE")*baseMagSize_Multiplier;
                 reload_speed = GUNS_PISTOL_JAKOBS.get("RELOAD_SPEED");//in seconds
                 crit_dmg = 2 + JAKOBS_BONUS_CRIT// Multi
-
-                this.handleCalculateStats_grip(grip);
-                this.handleCalculateStats_barrel(barrel);
-                const addGun_User = await UserGuns.upsert({
-                    user_id: this.#interaction.author.id,
-                    item_id: gun.item_id,
-                    equipped_slot_1 : false,
-                    equipped_slot_2 : false,
-
-                    gun_name : pistol.name,
-                    damage : damage,
-                    accuracy : accuracy,
-                    fire_rate : fire_interval,
-                    magazine_size : magazine_size,
-                    reload_speed : reload_speed,
-                    crit_dmg : damage*crit_dmg,
-                    shot_cost : shot_cost,
-                    projectile_count : projectile_count,
-
-                    body : body,
-                    barrel: barrel,
-                    grip : grip,
-                    scope : scope,
-                    rarity : itemRarity,
-                    gun_type : gunType,
-                })
-
-                if(addGun_User) console.log("Gun added!");
+            }
+            if(body == "BANDIT"){
+                damage = GUNS_PISTOL_BANDIT.get("DAMAGE")*beta*baseDamage_Multiplier;
+                max_accuracy = GUNS_PISTOL_BANDIT.get("ACCURACY") ;
+                fire_interval = GUNS_PISTOL_BANDIT.get("FIRE_INTERVAL");
+                magazine_size = GUNS_PISTOL_BANDIT.get("MAGAZINE_SIZE")*baseMagSize_Multiplier;
+                reload_speed = GUNS_PISTOL_BANDIT.get("RELOAD_SPEED");//in seconds
+                crit_dmg = 2// Multi
+            }
+            if(body == "DAHL"){
+                damage = GUNS_PISTOL_DAHL.get("DAMAGE")*beta*baseDamage_Multiplier;
+                max_accuracy = GUNS_PISTOL_DAHL.get("ACCURACY") ;
+                fire_interval = GUNS_PISTOL_DAHL.get("FIRE_INTERVAL");
+                magazine_size = GUNS_PISTOL_DAHL.get("MAGAZINE_SIZE")*baseMagSize_Multiplier;
+                reload_speed = GUNS_PISTOL_DAHL.get("RELOAD_SPEED");//in seconds
+                crit_dmg = 2// Multi
+            }
+            if(body == "HYPERION"){
+                damage = GUNS_PISTOL_HYPERION.get("DAMAGE")*beta*baseDamage_Multiplier;
+                max_accuracy = GUNS_PISTOL_HYPERION.get("ACCURACY") ;
+                fire_interval = GUNS_PISTOL_HYPERION.get("FIRE_INTERVAL");
+                magazine_size = GUNS_PISTOL_HYPERION.get("MAGAZINE_SIZE")*baseMagSize_Multiplier;
+                reload_speed = GUNS_PISTOL_HYPERION.get("RELOAD_SPEED");//in seconds
+                crit_dmg = 2// Multi
+            }
+            if(body == "MALIWAN"){
+                damage = GUNS_PISTOL_MALIWAN.get("DAMAGE")*beta*baseDamage_Multiplier;
+                max_accuracy = GUNS_PISTOL_MALIWAN.get("ACCURACY") ;
+                fire_interval = GUNS_PISTOL_MALIWAN.get("FIRE_INTERVAL");
+                magazine_size = GUNS_PISTOL_MALIWAN.get("MAGAZINE_SIZE")*baseMagSize_Multiplier;
+                reload_speed = GUNS_PISTOL_MALIWAN.get("RELOAD_SPEED");//in seconds
+                crit_dmg = 2// Multi
+            }
+            if(body == "TEDIORE"){
+                damage = GUNS_PISTOL_TEDIORE.get("DAMAGE")*beta*baseDamage_Multiplier;
+                max_accuracy = GUNS_PISTOL_TEDIORE.get("ACCURACY") ;
+                fire_interval = GUNS_PISTOL_TEDIORE.get("FIRE_INTERVAL");
+                magazine_size = GUNS_PISTOL_TEDIORE.get("MAGAZINE_SIZE")*baseMagSize_Multiplier;
+                reload_speed = GUNS_PISTOL_TEDIORE.get("RELOAD_SPEED");//in seconds
+                crit_dmg = 2// Multi
+            }
+            if(body == "TORGUE"){
+                damage = GUNS_PISTOL_TORGUE.get("DAMAGE")*beta*baseDamage_Multiplier;
+                max_accuracy = GUNS_PISTOL_TORGUE.get("ACCURACY") ;
+                fire_interval = GUNS_PISTOL_TORGUE.get("FIRE_INTERVAL");
+                magazine_size = GUNS_PISTOL_TORGUE.get("MAGAZINE_SIZE")*baseMagSize_Multiplier;
+                reload_speed = GUNS_PISTOL_TORGUE.get("RELOAD_SPEED");//in seconds
+                crit_dmg = 2// Multi
+            }
+            if(body == "VLADOF"){
+                damage = GUNS_PISTOL_VLADOF.get("DAMAGE")*beta*baseDamage_Multiplier;
+                max_accuracy = GUNS_PISTOL_VLADOF.get("ACCURACY") ;
+                fire_interval = GUNS_PISTOL_VLADOF.get("FIRE_INTERVAL");
+                magazine_size = GUNS_PISTOL_VLADOF.get("MAGAZINE_SIZE")*baseMagSize_Multiplier;
+                reload_speed = GUNS_PISTOL_VLADOF.get("RELOAD_SPEED");//in seconds
+                crit_dmg = 2// Multi
             }
 
+            this.handleCalculateStats_grip_pistol(grip);
+            this.handleCalculateStats_barrel_pistol(barrel);
+            this.handleCalculateStats_accessorie_pistol(accessorie);
+            await UserGuns.upsert({
+                user_id: this.#interaction.author.id,
+                item_id: gun.item_id,
+                equipped_slot_1 : false,
+                equipped_slot_2 : false,
 
+                gun_name : pistol.name,
+                damage : Math.floor(damage),
+                max_accuracy : max_accuracy,
+                min_accuracy : min_accuracy,
+                fire_rate : fire_interval.toFixed(2),
+                magazine_size : Math.floor(magazine_size.toFixed(2)),
+                reload_speed : reload_speed.toFixed(2),
+                crit_dmg : Math.floor(damage*crit_dmg.toFixed(2)),
+                shot_cost : Math.floor(shot_cost.toFixed(2)),
+                projectile_count : Math.floor(projectile_count.toFixed(2)),
 
+                body : body,
+                barrel: barrel,
+                grip : grip,
+                scope : scope,
+                rarity : itemRarity,
+                gun_type : gunType,
+            })
 
+            this.#interaction.reply(`Rolled : ${gun.name}`);
+            this.#interaction.reply(`
+            Damage - ${Math.floor(damage)}
+            Accuracy - ${Math.floor(100 - 12*spread)}
+            Reload Speed - ${reload_speed.toFixed(2)}
+            Fire Rate - ${(1/fire_interval).toFixed(2)}
+            Magazine Size - ${Math.floor(magazine_size.toFixed(2))}
+            `)
         }
-
     }
 
 

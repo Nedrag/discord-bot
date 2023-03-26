@@ -15,10 +15,23 @@ class SlotHandler
 
     async handleRoll()
     {
-        
-        console.log("OK1");
+        if(this.#interaction.channel.id != 1086203879642902528){
+            this.#interaction.reply("They see me rolling in the wrong channel... Go to #item-slots to roll!");
+            return;
+        }
         const ish = new ItemStatHandler(this.#interaction);
-        await ish.addItem();
+        const user = await Users.findOne({where : {user_id : this.#interaction.author.id}});
+        const gambasLeft = user.gambas;
+
+
+        if(!gambasLeft){
+            this.#interaction.reply("You don't have any gambas left. ");
+            return;
+        }
+
+        await ish.rollAndAddItem();
+        await Users.increment({gambas : -1}, {where : {user_id: this.#interaction.author.id}});
+        return;
     }
 
 }

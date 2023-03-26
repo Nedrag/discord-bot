@@ -9,24 +9,25 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 	storage: 'database.sqlite',
 });
 
-const Stands = require('./models/Stands.js')(sequelize, Sequelize.DataTypes);
+const Characters = require('./models/Characters.js')(sequelize, Sequelize.DataTypes);
 
 require('./models/Users.js')(sequelize, Sequelize.DataTypes);
-require('./models/UserStands.js')(sequelize, Sequelize.DataTypes);
-require('./models/UserGuns.js')(sequelize, Sequelize.DataTypes);
-require('./models/UserGear.js')(sequelize, Sequelize.DataTypes);
+require('./models/user_databases/UserCharacters.js')(sequelize, Sequelize.DataTypes);
+require('./models/user_databases/UserGuns.js')(sequelize, Sequelize.DataTypes);
+require('./models/user_databases/UserGear.js')(sequelize, Sequelize.DataTypes);
 
-const GunsAndGear = require('./models/GunsAndGear.js')(sequelize, Sequelize.DataTypes); 
-const GunsPool = require('./models/GunsPool.js')(sequelize, Sequelize.DataTypes);
-const GearPool = require('./models/GearPool.js')(sequelize, Sequelize.DataTypes);
-const ItemRarityPool = require('./models/ItemsRarityPool.js')(sequelize, Sequelize.DataTypes);
+const GunsAndGear = require('./models/item_pools/GunsAndGear.js')(sequelize, Sequelize.DataTypes); 
+const GunsPool = require('./models/item_pools/GunsPool.js')(sequelize, Sequelize.DataTypes);
+const GearPool = require('./models/item_pools/GearPool.js')(sequelize, Sequelize.DataTypes);
+const ItemRarityPool = require('./models/item_pools/ItemsRarityPool.js')(sequelize, Sequelize.DataTypes);
 const ItemGuns_Pistols= require('./models/item_guns/Pistols.js')(sequelize, Sequelize.DataTypes);
-const ItemPistol_Parts= require('./models/item_guns_parts/itemPistol_parts.js')(sequelize, Sequelize.DataTypes);
+const ITEM_GUN_PISTOL_DEFINITION= require('./models/item_guns_parts/itemPistol_parts.js')(sequelize, Sequelize.DataTypes);
+const EnemyPool = require('./models/enemy_pools/EnemyPool.js')(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 //CONSTANTS *** Weight => The lower the rarer
 const ITEM_GUNS_ODDS = 10000;
-const ITEM_GEAR_ODDS = 100;
+const ITEM_GEAR_ODDS = 10000;
 const ITEM_MONEY_ODDS = 1000;
 const ITEM_GAMBAS_ODDS = 200;
 
@@ -46,39 +47,17 @@ const ITEM_RARITY_BLUE = 800;
 const ITEM_RARITY_PURPLE = 300;
 const ITEM_RARITY_ORANGE = 200;
 
-let GUNS_PISTOL_PARTS = new Collection();
+const ENEMY_CHUMP = 1000
+const ENEMY_BADASS = 500 
+const ENEMY_SUPER_BADASS = 200 
+const ENEMY_NAMED_BOSS = 0 
 
+let GUNS_PISTOL_PARTS = new Collection();
 GUNS_PISTOL_PARTS.set("BODY",["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF"])
 GUNS_PISTOL_PARTS.set("BARREL", ["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF", "E-TECH"])
-//GUNS_PISTOL_PARTS.set("GRIP", ["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF"])
-//GUNS_PISTOL_PARTS.set("SCOPE", ["JAKOBS", "TORGUE" , "HYPERION" , "MALIWAN", "DHAL", "TEDIORE", "BANDIT", "VLADOF", "NONE"])
 
-const GUNS_SNIPER_PARTS = {
-	"BODY" : ["JAKOBS",  "HYPERION" , "MALIWAN", "DHAL",  "VLADOF"],
-	"BARREL" : ["JAKOBS",  "HYPERION" , "MALIWAN", "DHAL",  "VLADOF", "E-TECH"],
-	"GRIP" : ["JAKOBS",  "HYPERION" , "MALIWAN", "DHAL",  "VLADOF"],
-	"STOCK" : ["JAKOBS",  "HYPERION" , "MALIWAN", "DHAL",  "VLADOF"],
-	"SCOPE" : ["JAKOBS",  "HYPERION" , "MALIWAN", "DHAL",  "VLADOF"],
-} 
+
 sequelize.sync({ force }).then(async () => {
-	const stands = [
-		Stands.upsert({ name: 'Star Platinum', cost: 100000 , rarity: 0.01,
-		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Stands.upsert({ name: 'Hermit Purple', cost: 56000, rarity: 0.02,
-		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1  }),
-		Stands.upsert({ name: `Magician's Red`, cost: 56000, rarity: 0.02,
-		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1  }),
-		Stands.upsert({ name: 'Hierophant Green', cost: 56000 , rarity: 0.02,
-		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		Stands.upsert({ name: 'Silver Chariot', cost: 56000, rarity: 0.02,
-		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1  }),
-		Stands.upsert({ name: `The Fool`, cost: 56000, rarity: 0.02,
-		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1  }),
-		Stands.upsert({ name: 'The World', cost: 100000 , rarity: 0.01,
-		power: 1, speed: 1, stamina: 1, precision: 1, mana: 1 }),
-		
-        
-	]
 	const gunsAndGear = [
 		GunsAndGear.upsert({name: "ITEM_GUNS", weight: ITEM_GUNS_ODDS}),
 		GunsAndGear.upsert({name: "ITEM_GEAR", weight: ITEM_GEAR_ODDS}),
@@ -217,25 +196,42 @@ sequelize.sync({ force }).then(async () => {
 		}
 	}
 	const itemPistol_parts = [
-		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "BANDIT"}),
-		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "DAHL"}),
-		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "HYPERION"}),
-		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "JAKOBS"}),
-		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "MALIWAN"}),
-		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "TEDIORE"}),
-		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "TORGUE"}),
-		ItemPistol_Parts.upsert({part : "GRIP", manufacturer : "VLADOF"}),
-		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "BANDIT"}),
-		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "DAHL"}),
-		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "HYPERION"}),
-		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "JAKOBS"}),
-		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "MALIWAN"}),
-		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "TEDIORE"}),
-		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "TORGUE"}),
-		ItemPistol_Parts.upsert({part : "SCOPE", manufacturer : "VLADOF"}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "ACCURACY_LASER",max_accuracy : 5,  min_accuracy : 5,spread:8, add_type: "GRADE"}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "BAYONET_1", melee_dmg: 0.5, add_type: "PREADD"}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "BAYONET_2", melee_dmg: 0.5, add_type: "PREADD"}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "DOUBLE_LASER", add_type: "GRADE", fire_interval : -10, magazine_size: 4, min_accuracy: -5, damage: -5, spread : -5}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "DOUBLE_LASER", add_type: "PREADD", magazine_size: 2, projectile_count : 0.4, spread: 1}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "DOUBLE_LASER", add_type: "SCALE", projectile_count: 0.6, shot_cost : 1}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "STOCK", add_type: "GRADE", max_accuracy: 7, spread: 3}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "TECH_1_MAG", add_type: "GRADE", magazine_size: 8, reload_speed: -3}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "TECH_2_DAMAGE", add_type: "GRADE", damage: 6}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "ACCESSORIES", manufacturer: "TECH_3_FIRERATE", add_type: "GRADE",fire_interval : 6, damage: -1}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "BANDIT", add_type: "GRADE", damage: 2, min_accuracy: -3, spread: -3}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "BANDIT", add_type: "GRADE"}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "DAHL", add_type: "GRADE", damage: -3, max_accuracy: 5, spread: -4}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "E_TECH", add_type: "SCALE",fire_interval: 0.5,status_chance: 0.2, damage: 1}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "E_TECH", add_type: "PREADD", shot_cost: 1}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "HYPERION", add_type: "GRADE",magazine_size: -2, min_accuracy: 5, damage: -4, spread: 7 }),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "HYPERION", add_type: "PREADD", crit_dmg: 0.15 }),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "JAKOBS", add_type: "GRADE",fire_interval: -12, min_accuracy: 5, damage: 6, spread: 8 }),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "MALIWAN", add_type : "SCALE", status_chance: 0.15}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "MALIWAN", add_type : "GRADE",max_accuracy: 2, spread: 2}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "TEDIORE", add_type : "GRADE",}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "TORGUE", add_type : "GRADE", fire_interval: -3, min_accuracy: -8, reload_speed: -5, damage: 8}),
+		ITEM_GUN_PISTOL_DEFINITION.upsert({part: "BARREL", manufacturer: "VLADOF", add_type : "GRADE", fire_interval: 10, magazine_size: 4, spread: -4}),
+
+
 	]	
 
-	await Promise.all(stands);
+	const enemyPool = [
+		EnemyPool.upsert({enemy_id: 1, name : "CHUMP", weight: ENEMY_CHUMP}),
+		EnemyPool.upsert({enemy_id: 2, name : "BADASS", weight: ENEMY_BADASS}),
+		EnemyPool.upsert({enemy_id: 3, name : "SUPER_BADASS", weight: ENEMY_SUPER_BADASS}),
+		EnemyPool.upsert({enemy_id: 4, name : "NAMED_BOSS", weight: ENEMY_NAMED_BOSS}),
+	] 
+	
+
+	await Promise.all(enemyPool);
 	await Promise.all(gunsAndGear);
 	await Promise.all(gunsPool);
 	await Promise.all(gearPool);

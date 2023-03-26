@@ -1,8 +1,8 @@
 
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('user_stands', {
+    return sequelize.define('user_chars', {
 		user_id: DataTypes.STRING,
-		stand_id: DataTypes.INTEGER,
+		char_id: DataTypes.INTEGER,
         level : {
             type: DataTypes.INTEGER,
             defaultValue: 1,
@@ -13,11 +13,8 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 0,
             allowNull: false
         },
-		equipped : {
-			type: DataTypes.BOOLEAN,
-			defaultValue : false,
-			allowNull : false
-		}
+        in_use : DataTypes.BOOLEAN,
+        
 	},
 	 {
 		timestamps: false,

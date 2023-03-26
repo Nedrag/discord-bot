@@ -5,6 +5,7 @@ const { execute } = require("./ready");
 //Custom classes imports
 const {InstanceHandler} = require('../classes/InstanceHandler.js');
 const {SlotHandler} = require('../classes/SlotHandler.js');
+const {UserInventoryHandler} = require('../classes/UserInventoryHandler.js');
 
 const COMMAND_PREFIX = '$';
 
@@ -27,9 +28,10 @@ module.exports =
         //Handlers for message commands
         const instanceHandler = new InstanceHandler(interaction);//Intance Handler Object 
         const slotHandler = new SlotHandler(interaction); 
-        //const userInventoryHandler = new UserInventoryHandler(interaction);
+        const userInventoryHandler = new UserInventoryHandler(interaction);
 
         //Main logic for commands    
+        try{
         switch(interaction.content.toUpperCase().split(" ")[0])
         {
             case "$I":
@@ -37,13 +39,16 @@ module.exports =
                 instanceHandler.handleCreateThread();
                 break;
             case "$R":
-                //slotHandler.handleRoll();
-                await slotHandler.handleRoll();
-                
-                //console.log(slotHandler.getItem())
+                await slotHandler.handleRoll(); 
+                break;
+            case "$ADD":
+                await userInventoryHandler.addBalance();
                 break;
             
 
         }
+    }catch(e){
+        console.log(e);
+    }
     }
 }
